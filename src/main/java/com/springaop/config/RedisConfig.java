@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 /**
@@ -46,7 +47,6 @@ public class RedisConfig {
         if (timeBetweenEviction > 0) {
             config.setTimeBetweenEvictionRunsMillis(timeBetweenEviction);
         }
-
         return config;
     }
 

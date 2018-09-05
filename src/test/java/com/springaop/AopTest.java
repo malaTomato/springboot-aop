@@ -35,11 +35,19 @@ public class AopTest {
     @Test
     public void controller2Test(){
         User user = new User("xw",1);
+        System.out.println("enter");
         controller.testList(Arrays.asList(user));
     }
 
     @Test
     public void testRedis(){
         RedisUtil.set("ttt","123",10000);
+        Object ttt = RedisUtil.getString("ttt");
+        System.out.println(ttt.toString());
+    }
+
+    @Test
+    public void test(){
+        controller.test();
     }
 }

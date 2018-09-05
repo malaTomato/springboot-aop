@@ -12,6 +12,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RedisCache {
-    String key();
-    long timeOut();
+    int timeOutSecond() default 10;
 }

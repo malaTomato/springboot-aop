@@ -5,6 +5,7 @@ import com.springaop.annotion.RedisCache;
 import com.springaop.util.RedisUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
@@ -14,17 +15,17 @@ import org.springframework.stereotype.Component;
  *
  * @author xiongwu
  */
-@Aspect
 @Component
+@Aspect
 public class RedisCacheAspect {
 
     private RedisCache redisCache;
-
     /**
      * Point cut.
      */
     @Pointcut(value = "@annotation(com.springaop.annotion.RedisCache)")
-    void pointCut(){}
+    void pointCut() {
+    }
 
     /**
      * 1.获取注解中的值，生成redis key
@@ -36,14 +37,17 @@ public class RedisCacheAspect {
      * @return object
      */
     @Around(value = "pointCut()")
-    public Object around(ProceedingJoinPoint joinPoint){
+    public Object around(ProceedingJoinPoint joinPoint) {
         System.out.println("controller before");
 
         String redisKey = this.getRedisKey(joinPoint);
-        Object value = RedisUtil.getObject(redisKey);
-        if(value == null){
+        System.out.println(redisKey);
+        Object value = RedisUtil.getString(redisKey);
+        if (value == null) {
             try {
-                joinPoint.proceed();
+                Object proceed = joinPoint.proceed();
+                this.setRedisCache(joinPoint);
+                RedisUtil.set(this.getRedisKey(joinPoint), proceed, redisCache.timeOutSecond());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
@@ -53,30 +57,14 @@ public class RedisCacheAspect {
         return null;
     }
 
-
-    /**
-     * After.
-     *
-     * @param joinPoint the join point
-     * @param obj       the obj
-     */
-    @AfterReturning(value = "pointCut()",returning = "obj")
-    public void after(JoinPoint joinPoint,Object obj){
-        RedisUtil.set(this.getRedisKey(joinPoint),obj,10000);
+    private void setRedisCache(JoinPoint joinPoint){
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        redisCache = signature.getMethod().getAnnotation(RedisCache.class);
     }
 
-    private String getRedisKey(JoinPoint joinPoint){
-
-        Object[] args = joinPoint.getArgs();
-        String kind = joinPoint.getKind();
-        if(args.length>0){
-
-
-            int hashCode = args.hashCode();
-            System.out.println(hashCode);
-            return kind + hashCode;
-        }
-        return kind;
+    private String getRedisKey(JoinPoint joinPoint) {
+        Signature signature = joinPoint.getSignature();
+        return signature.getDeclaringType() + ":" + signature.getName() + ":" + JSONObject.toJSONString(joinPoint.getArgs()).hashCode();
     }
 
 }

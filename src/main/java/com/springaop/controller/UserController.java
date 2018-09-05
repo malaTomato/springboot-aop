@@ -16,7 +16,14 @@ public class UserController {
 
 
     @WriteLog
+    @RedisCache(timeOutSecond = 100)
     public void test(String name,Integer age){
+        System.out.println("this is a function");
+    }
+
+    @WriteLog
+    @RedisCache(timeOutSecond = 100)
+    public void test(){
         System.out.println("this is a function");
     }
 
@@ -25,10 +32,11 @@ public class UserController {
         System.out.println("this is a function");
     }
 
-    @RedisCache(key="ssss",timeOut = 10000)
+
     @WriteLog
+    @RedisCache(timeOutSecond = 100)
     public String testList(List<User> list){
-        System.out.println("this is a function");
+        System.out.println("execute is a function");
         return "Ok";
     }
 }
